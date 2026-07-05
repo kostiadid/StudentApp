@@ -1,4 +1,6 @@
-﻿using StudentApp.Models;
+﻿using StudentApp.Database;
+using StudentApp.Entities;
+using StudentApp.Models;
 
 namespace StudentApp.Services
 {
@@ -10,9 +12,36 @@ namespace StudentApp.Services
     }
     public class StudentService : IStudentService
     {
+        private readonly StudentDbContext _context;
+        public StudentService(StudentDbContext context)
+        {
+            _context = context;
+        }
         public StudentResponseDto Create(StudentCreateDto dto)
         {
-            throw new NotImplementedException();
+            if(_context.Students.Any(n=>n.Email == dto.Email))
+                throw new Exception("Student with the same email already exists");
+            if (_context.Students.Any(n => n.StudentNumber == dto.StudentNumber))
+                throw new Exception("Student with the same student number already exists");
+            var student = new Student
+            {
+                FirstName = dto.FirstName,
+                LastName = dto.LastName,
+                Email = dto.Email,
+                StudentNumber = dto.StudentNumber
+            };
+
+            _context.Students.Add(student);
+            _context.SaveChanges();
+
+            return new StudentResponseDto
+            {
+                Id = student.Id,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                StudentNumber = student.StudentNumber
+            };
         }
 
         public IEnumerable<StudentResponseDto> GetAll()

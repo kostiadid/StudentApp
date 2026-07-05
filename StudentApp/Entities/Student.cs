@@ -9,6 +9,6 @@
         public string StudentNumber { get; set; } 
         public DateTime CreatedDate { get; set; }
         public ICollection<Petition> Petitions { get; set; } 
-
+        
     }
 }

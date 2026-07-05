@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudentApp.Database;
 using StudentApp.Entities;
+using StudentApp.Models;
+using StudentApp.Services;
 
 namespace StudentApp.Controllers
 {
@@ -8,25 +10,22 @@ namespace StudentApp.Controllers
     [Route("api/[controller]")]
     public class StudentsController : ControllerBase
     {
-        private readonly StudentDbContext _context;
+        private readonly IStudentService _studentService;
 
-        public StudentsController(StudentDbContext context)
-        {
-            _context = context;
-        }
+        public StudentsController(IStudentService studentService)
+        { _studentService = studentService;}
 
         [HttpPost]
-        public IActionResult CreateStudent(Student student)
+        public IActionResult CreateStudent(StudentCreateDto student)
         {
-            _context.Students.Add(student);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetStudentById), new { id = student.Id }, student);
+            //_studentService.Create(student);
+            return Ok(_studentService.Create(student));
         }
 
         [HttpGet("{id}")]
         public IActionResult GetStudentById(int id)
         {
-            var student = _context.Students.Find(id);
+            var student = _studentService.GetById(id);
             if (student == null) return NotFound();
             return Ok(student);
         }
@@ -34,7 +33,7 @@ namespace StudentApp.Controllers
         [HttpGet]
         public IActionResult GetAllStudents()
         {
-            var students = _context.Students.ToList();
+            var students = _studentService.GetAll();
             return Ok(students);
         }
 

@@ -10,14 +10,10 @@ namespace StudentApp.Controllers
     [Route("api/[controller]")]
     public class PetitionsController : ControllerBase
     {
-        private readonly StudentDbContext _context;
         private readonly IPetitionService _service;
 
-        public PetitionsController(StudentDbContext context, IPetitionService service)
-        {
-            _context = context;
-            _service = service;
-        }
+        public PetitionsController(IPetitionService service)
+        { _service = service;}
 
         [HttpPost]
         public IActionResult Create(PetitionCreateDto dto)
