@@ -20,13 +20,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
     <Folder Include="Mapping\" />
     <Folder Include="Middleware\" />
     <Folder Include="Configurations\" />
     <Folder Include="Validators\" />
     <Folder Include="Repositories\" />
-    <Folder Include="Services\" />
   </ItemGroup>
 
 </Project>

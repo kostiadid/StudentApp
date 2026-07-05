@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudentApp.Database;
 using StudentApp.Entities;
+using StudentApp.Models;
+using StudentApp.Services;
 
 namespace StudentApp.Controllers
 {
@@ -9,36 +11,24 @@ namespace StudentApp.Controllers
     public class PetitionsController : ControllerBase
     {
         private readonly StudentDbContext _context;
+        private readonly IPetitionService _service;
 
-        public PetitionsController(StudentDbContext context)
+        public PetitionsController(StudentDbContext context, IPetitionService service)
         {
             _context = context;
+            _service = service;
         }
 
         [HttpPost]
-        public IActionResult CreatePetition(Petition petition)
-        {
-            petition.Status = PetitionStatus.Draft;
-            petition.CreatedAt = DateTime.UtcNow;
-            _context.Petitions.Add(petition);
-            _context.SaveChanges();
-            return CreatedAtAction(nameof(GetPetitionById), new { id = petition.Id }, petition);
-        }
+        public IActionResult Create(PetitionCreateDto dto)
+             => Ok(_service.Create(dto));
 
-        [HttpGet("{id}")]
-        public IActionResult GetPetitionById(int id)
-        {
-            var petition = _context.Petitions.Find(id);
-            if (petition == null) return NotFound();
-            return Ok(petition);
-        }
+        [HttpPost("{id}/submit")]
+        public IActionResult Submit(int id)
+            => Ok(_service.Submit(id));
 
-        [HttpGet]
-        public IActionResult GetAllPetitions()
-        {
-            var petitions = _context.Petitions.ToList();
-            return Ok(petitions);
-        }
+        [HttpPost("{id}/review")]
+        public IActionResult Review(int id, PatientReviewDto dto)
+            => Ok(_service.Review(id, dto));
     }
-
 }
