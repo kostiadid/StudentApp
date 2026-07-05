@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+using StudentApp.Database;
 
 namespace StudentApp
 {
@@ -7,12 +9,13 @@ namespace StudentApp
         {
             var builder = WebApplication.CreateBuilder(args);
 
+            // Add DbContext
+            builder.Services.AddDbContext<StudentDbContext>(options =>
+                options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
+
             // Add services to the container.
-
             builder.Services.AddControllers();
-            // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
             builder.Services.AddOpenApi();
-
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.
@@ -22,10 +25,7 @@ namespace StudentApp
             }
 
             app.UseHttpsRedirection();
-
             app.UseAuthorization();
-
-
             app.MapControllers();
 
             app.Run();
