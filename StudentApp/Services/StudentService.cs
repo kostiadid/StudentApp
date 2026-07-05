@@ -1,4 +1,5 @@
-﻿using StudentApp.Database;
+﻿using Microsoft.EntityFrameworkCore;
+using StudentApp.Database;
 using StudentApp.Entities;
 using StudentApp.Models;
 
@@ -46,12 +47,33 @@ namespace StudentApp.Services
 
         public IEnumerable<StudentResponseDto> GetAll()
         {
-            throw new NotImplementedException();
+            List<StudentResponseDto> studentsAllList = _context.Students
+                .AsNoTracking()
+                .Select(student => new StudentResponseDto
+                {
+                    Id = student.Id,
+                    FirstName = student.FirstName,
+                    LastName = student.LastName,
+                    Email = student.Email,
+                    StudentNumber = student.StudentNumber
+                })
+                .ToList();
+            return studentsAllList;
         }
 
         public StudentResponseDto GetById(int id)
         {
-            throw new NotImplementedException();
+            var student = _context.Students.Find(id);
+            if (student == null) throw new Exception("Student not found");
+
+            return new StudentResponseDto
+            {
+                Id = student.Id,
+                FirstName = student.FirstName,
+                LastName = student.LastName,
+                Email = student.Email,
+                StudentNumber = student.StudentNumber
+            };
         }
     }
 }

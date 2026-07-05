@@ -17,7 +17,7 @@ namespace StudentApp
             // Add services to the container.
 
             builder.Services.AddScoped<IPetitionService, PetitionService>();
-            builder.Services.AddScoped<>
+            builder.Services.AddScoped<IStudentService, StudentService>();
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
