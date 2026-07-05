@@ -96,7 +96,8 @@ namespace StudentApp.Services
         {
             var petition = _context.Petitions.Find(id);
             if (petition == null) throw new Exception("Petition not found");
-
+            if (petition.Status != PetitionStatus.Draft)
+                throw new Exception("Update allowed only for Draft");
             // Update fields
             petition.Title = updated.Title;
             petition.Description = updated.Description;
