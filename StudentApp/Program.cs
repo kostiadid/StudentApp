@@ -1,6 +1,10 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.EntityFrameworkCore;
 using StudentApp.Database;
+using StudentApp.Repositories;
 using StudentApp.Services;
+using StudentApp.Validators;
 
 namespace StudentApp
 {
@@ -15,9 +19,12 @@ namespace StudentApp
                 options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
             // Add services to the container.
-
+            builder.Services.AddScoped<IStudentDbRepo, StudentDbRepo>();
             builder.Services.AddScoped<IPetitionService, PetitionService>();
             builder.Services.AddScoped<IStudentService, StudentService>();
+            builder.Services.AddValidatorsFromAssembly(typeof(StudentCreateDtoValidator).Assembly);
+            builder.Services.AddFluentValidationAutoValidation();
+            builder.Services.AddFluentValidationClientsideAdapters();
 
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();

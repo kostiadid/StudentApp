@@ -1,7 +1,6 @@
 ﻿using StudentApp.Entities;
-using Microsoft.AspNetCore.Mvc;
-using StudentApp.Database;
 using StudentApp.Models;
+using StudentApp.Repositories;
 namespace StudentApp.Services
 {
     public interface IPetitionService
@@ -16,13 +15,15 @@ namespace StudentApp.Services
 
     public class PetitionService : IPetitionService
     {
-        private readonly StudentDbContext _context;
-        public PetitionService(StudentDbContext context)
+        private readonly IStudentDbRepo _studentDbRepo;
+        public PetitionService (IStudentDbRepo studentDbRepo)
         {
-            _context = context;
+            _studentDbRepo = studentDbRepo;
         }
+
         public Petition Create(PetitionCreateDto dto)
         {
+
             var petition = new Petition
             {
                 StudentId = dto.StudentId,
@@ -30,19 +31,19 @@ namespace StudentApp.Services
                 Title = dto.Title,
                 Description = dto.Description,
                 Status = PetitionStatus.Draft,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow.Date
             };
-            _context.Petitions.Add(petition);
-            _context.SaveChanges();
+            _studentDbRepo.AddPetition(petition);
+            _studentDbRepo.SaveChanges();
             return petition;
         }
         public Petition GetById(int id)
         {
-            return _context.Petitions.Find(id);
+            return _studentDbRepo.GetPetitionById(id);
         }
         public IEnumerable<Petition> GetAll(string? status, PetitionType? type, int? studentId, DateTime? dateFrom, DateTime? dateTo)
         {
-            var query = _context.Petitions.AsQueryable();
+            var query = _studentDbRepo.GetPetitions().AsQueryable();
             if (!string.IsNullOrEmpty(status))
                 query = query.Where(p => p.Status.ToString() == status);
             if (type.HasValue)
@@ -57,7 +58,7 @@ namespace StudentApp.Services
         }
         public Petition Submit(int id)
         {
-            var petition = _context.Petitions.Find(id);
+            var petition = _studentDbRepo.GetPetitionById(id);
             if (petition == null)
                 throw new Exception("Petition not found");
 
@@ -65,16 +66,16 @@ namespace StudentApp.Services
                 throw new Exception("Submit allowed only for Draft");
 
             petition.Status = PetitionStatus.Submitted;
-            petition.UpdatedAt = DateTime.UtcNow;
+            petition.UpdatedAt = DateTime.UtcNow.Date;
 
             petition.Status = PetitionStatus.UnderReview;
 
-            _context.SaveChanges();
+            _studentDbRepo.SaveChanges();
             return petition;
         }
         public Petition Review(int id, PatientReviewDto dto)
         {
-            var petition = _context.Petitions.Find(id);
+            var petition = _studentDbRepo.GetPetitionById(id);
             if (petition == null)
                 throw new Exception("Petition not found");
 
@@ -86,15 +87,15 @@ namespace StudentApp.Services
 
             petition.Status = dto.Approved ? PetitionStatus.Approved : PetitionStatus.Rejected;
             petition.ReviewComment = dto.Comment;
-            petition.ReviewedAt = DateTime.UtcNow;
+            petition.ReviewedAt = DateTime.UtcNow.Date;
 
-            _context.SaveChanges();
+            _studentDbRepo.SaveChanges();
             return petition;
         } 
 
         public Petition Update(int id, Petition updated)
         {
-            var petition = _context.Petitions.Find(id);
+            var petition = _studentDbRepo.GetPetitionById(id);
             if (petition == null) 
                 throw new Exception("Petition not found");
             if (petition.Status != PetitionStatus.Draft)
@@ -107,11 +108,11 @@ namespace StudentApp.Services
             if (!hasChanges)
                 return petition;
 
-            petition.UpdatedAt = DateTime.UtcNow;
+            petition.UpdatedAt = DateTime.UtcNow.Date;
             petition.Title = updated.Title;
             petition.Description = updated.Description;
             petition.PetitionType = updated.PetitionType;
-            _context.SaveChanges();
+            _studentDbRepo.SaveChanges();
             return petition;
         }   
     }

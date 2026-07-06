@@ -26,5 +26,13 @@ namespace StudentApp.Controllers
         [HttpPost("{id}/review")]
         public IActionResult Review(int id, PatientReviewDto dto)
             => Ok(_service.Review(id, dto));
+
+        [HttpGet("{id}")]
+        public IActionResult GetStudentById(int id)
+        {
+            var student = _service.GetById(id);
+            if (student == null) return NotFound();
+            return Ok(student);
+        }
     }
 }

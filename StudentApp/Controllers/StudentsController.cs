@@ -1,6 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StudentApp.Database;
-using StudentApp.Entities;
 using StudentApp.Models;
 using StudentApp.Services;
 
@@ -31,9 +29,9 @@ namespace StudentApp.Controllers
         }
 
         [HttpGet]
-        public IActionResult GetAllStudents()
+        public IActionResult GetAllStudents([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
         {
-            var students = _studentService.GetAll();
+            var students = _studentService.GetAll(page, pageSize);
             return Ok(students);
         }
 

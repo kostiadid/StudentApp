@@ -1,28 +1,29 @@
-﻿using Microsoft.EntityFrameworkCore;
-using StudentApp.Database;
-using StudentApp.Entities;
+﻿using StudentApp.Entities;
 using StudentApp.Models;
-
+using StudentApp.Repositories;
 namespace StudentApp.Services
 {
     public interface IStudentService
     {
         StudentResponseDto Create(StudentCreateDto dto);
         StudentResponseDto GetById(int id);
-        IEnumerable<StudentResponseDto> GetAll();
+        IEnumerable<StudentResponseDto> GetAll(int page, int pageSize);
     }
     public class StudentService : IStudentService
     {
-        private readonly StudentDbContext _context;
-        public StudentService(StudentDbContext context)
+
+        private readonly IStudentDbRepo _studentDbRepo;
+
+        public StudentService(IStudentDbRepo studentDbRepo)
         {
-            _context = context;
+            _studentDbRepo = studentDbRepo;
         }
+
         public StudentResponseDto Create(StudentCreateDto dto)
         {
-            if(_context.Students.Any(n=>n.Email == dto.Email))
+            if(_studentDbRepo.StudentExistsByEmail(dto.Email))
                 throw new Exception("Student with the same email already exists");
-            if (_context.Students.Any(n => n.StudentNumber == dto.StudentNumber))
+            if (_studentDbRepo.StudentExistsByStudentNumber(dto.StudentNumber))
                 throw new Exception("Student with the same student number already exists");
             var student = new Student
             {
@@ -32,8 +33,8 @@ namespace StudentApp.Services
                 StudentNumber = dto.StudentNumber
             };
 
-            _context.Students.Add(student);
-            _context.SaveChanges();
+            _studentDbRepo.AddStudent(student);
+            _studentDbRepo.SaveChanges();
 
             return new StudentResponseDto
             {
@@ -45,10 +46,14 @@ namespace StudentApp.Services
             };
         }
 
-        public IEnumerable<StudentResponseDto> GetAll()
+        public IEnumerable<StudentResponseDto> GetAll(int page, int pageSize)
         {
-            List<StudentResponseDto> studentsAllList = _context.Students
-                .AsNoTracking()
+            if (page < 1) page = 1;
+            if (pageSize < 1) pageSize = 10;
+            if (pageSize > 100) pageSize = 100; 
+
+
+            List<StudentResponseDto> studentsAllList = _studentDbRepo.GetStudentsPage(page,pageSize)
                 .Select(student => new StudentResponseDto
                 {
                     Id = student.Id,
@@ -63,7 +68,7 @@ namespace StudentApp.Services
 
         public StudentResponseDto GetById(int id)
         {
-            var student = _context.Students.Find(id);
+            var student = _studentDbRepo.GetStudentById(id);
             if (student == null) throw new Exception("Student not found");
 
             return new StudentResponseDto
