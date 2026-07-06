@@ -43,19 +43,10 @@ namespace StudentApp.Services
         }
         public IEnumerable<Petition> GetAll(string? status, PetitionType? type, int? studentId, DateTime? dateFrom, DateTime? dateTo)
         {
-            var query = _studentDbRepo.GetPetitions().AsQueryable();
-            if (!string.IsNullOrEmpty(status))
-                query = query.Where(p => p.Status.ToString() == status);
-            if (type.HasValue)
-                query = query.Where(p => p.PetitionType == type.Value);
-            if (studentId.HasValue)
-                query = query.Where(p => p.StudentId == studentId.Value);
-            if (dateFrom.HasValue)
-                query = query.Where(p => p.CreatedAt >= dateFrom.Value);
-            if (dateTo.HasValue)
-                query = query.Where(p => p.CreatedAt <= dateTo.Value);
+            var query = _studentDbRepo.GetPetitions(status, type, studentId, dateFrom, dateTo);
             return query.ToList();
         }
+
         public Petition Submit(int id)
         {
             var petition = _studentDbRepo.GetPetitionById(id);
